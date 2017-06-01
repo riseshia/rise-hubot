@@ -12,58 +12,72 @@
 //   hubot start pomo <time> - start a new pomodoro with a duration of <time> minutes
 //   hubot stop pomo - stop a pomodoro
 //   hubot pomo? - shows the details of the current pomodoro
-//   hubot total pomos - shows the number of the total completed pomodoros
 
-let currentPomodoro = null;
+let currentPomodoro = {}
 
-const defaultLength = 25;
+const defaultLength = 25
+
+const userNameFrom = (msg) => {
+  if (msg.message && msg.message.user && msg.message.user.name) {
+    return `@${msg.message.user.name}`
+  }
+  return "@Unknown"
+}
 
 module.exports = function(robot) {
-  var base;
-  (base = robot.brain.data).pomodoros || (base.pomodoros = 0);
+  robot.hear(/.*/i, function(msg) {
+    const userName = userNameFrom(msg)
+    const userPomodoro = currentPomodoro[userName]
+    if (userPomodoro && !msg.message.text.includes("pomo")) {
+      msg.send(`${userName}さん、ポモドーロの最中は集中してください。`)
+    }
+  })
+
   robot.respond(/start pomo ?(\d+)?/i, function(msg) {
-    if (currentPomodoro != null) {
-      msg.send("ポモドーロの途中です。");
-      return;
+    const userName = userNameFrom(msg)
+    if (currentPomodoro[userName]) {
+      msg.send("ポモドーロの途中です。")
+      return
     }
-    currentPomodoro = {};
-    currentPomodoro.func = function() {
-      msg.send("ポモドーロが終わりました。お疲れ様です。");
-      currentPomodoro = null;
-      return robot.brain.data.pomodoros += 1;
-    };
-    currentPomodoro.time = new Date();
-    currentPomodoro.length = defaultLength;
-    if (msg.match[1] != null) {
-      currentPomodoro.length = parseInt(msg.match[1]);
+    const userPomodoro = {}
+    userPomodoro.func = function() {
+      msg.send(`${userName}さん、ポモドーロが終わりました。お疲れ様です。`)
+      currentPomodoro[userName] = null
     }
-    msg.send("ポモドーロが始まりました。");
-    return currentPomodoro.timer = setTimeout(currentPomodoro.func, currentPomodoro.length * 60 * 1000);
-  });
+    userPomodoro.time = new Date()
+    userPomodoro.length = defaultLength
+    if (msg.match[1]) {
+      userPomodoro.length = parseInt(msg.match[1])
+    }
+    currentPomodoro[userName] = userPomodoro
+    msg.send(`${userName}さんのポモドーロが始まりました。`)
+
+    return userPomodoro.timer = setTimeout(userPomodoro.func, userPomodoro.length * 60 * 1000)
+  })
 
   robot.respond(/pomo\?/i, function(msg) {
-    var minutes;
-    if (currentPomodoro == null) {
-      msg.send("ポモドーロの途中ではありません。");
-      return;
+    let minutes
+    const userName = userNameFrom(msg)
+    const userPomodoro = currentPomodoro[userName]
+    if (!userPomodoro) {
+      msg.send(`${userName}さんはポモドーロの途中ではありませんよ？`)
+      return
     }
-    minutes = currentPomodoro.time.getTime() + currentPomodoro.length * 60 * 1000;
-    minutes -= new Date().getTime();
-    minutes = Math.round(minutes / 1000 / 60);
-    return msg.send("まだ" + minutes + "分が残っています。");
-  });
+    minutes = userPomodoro.time.getTime() + userPomodoro.length * 60 * 1000
+    minutes -= new Date().getTime()
+    minutes = Math.round(minutes / 1000 / 60)
+    return msg.send(`まだ${minutes}分が残っています。`)
+  })
 
   robot.respond(/stop pomo/i, function(msg) {
-    if (currentPomodoro == null) {
-      msg.send("ポモドーロの途中ではありません。");
-      return;
+    const userName = userNameFrom(msg)
+    const userPomodoro = currentPomodoro[userName]
+    if (!userPomodoro) {
+      msg.send(`${userName}さんはポモドーロの途中ではありませんよ？`)
+      return
     }
-    clearTimeout(currentPomodoro.timer);
-    currentPomodoro = null;
-    return msg.send("ポモドーロが中止されました。");
-  });
-
-  return robot.respond(/total pomos/i, function(msg) {
-    return msg.send("完了したポモドーロは" + robot.brain.data.pomodoros + "個です。");
-  });
-};
+    clearTimeout(userPomodoro.timer)
+    currentPomodoro[userName] = null
+    return msg.send("ポモドーロが中止されました。")
+  })
+}
