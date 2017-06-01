@@ -13,9 +13,6 @@
 //   hubot stop pomo - stop a pomodoro
 //   hubot pomo? - shows the details of the current pomodoro
 //   hubot total pomos - shows the number of the total completed pomodoros
-//
-// Author:
-//   mcollina
 
 let currentPomodoro = null;
 
@@ -43,6 +40,7 @@ module.exports = function(robot) {
     msg.send("ポモドーロが始まりました。");
     return currentPomodoro.timer = setTimeout(currentPomodoro.func, currentPomodoro.length * 60 * 1000);
   });
+
   robot.respond(/pomo\?/i, function(msg) {
     var minutes;
     if (currentPomodoro == null) {
@@ -54,6 +52,7 @@ module.exports = function(robot) {
     minutes = Math.round(minutes / 1000 / 60);
     return msg.send("まだ" + minutes + "分が残っています。");
   });
+
   robot.respond(/stop pomo/i, function(msg) {
     if (currentPomodoro == null) {
       msg.send("ポモドーロの途中ではありません。");
@@ -65,6 +64,6 @@ module.exports = function(robot) {
   });
 
   return robot.respond(/total pomos/i, function(msg) {
-    return msg.send("You have completed " + robot.brain.data.pomodoros + " pomodoros");
+    return msg.send("完了したポモドーロは" + robot.brain.data.pomodoros + "個です。");
   });
 };
