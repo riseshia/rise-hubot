@@ -17,5 +17,8 @@
   },
   "engines": {
     "node": "7"
+  },
+  "devDependencies": {
+    "standard": "^10.0.2"
   }
 }
