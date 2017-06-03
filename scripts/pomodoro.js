@@ -21,26 +21,26 @@ const userNameFrom = (msg) => {
   if (msg.message && msg.message.user && msg.message.user.name) {
     return `@${msg.message.user.name}`
   }
-  return "@Unknown"
+  return '@Unknown'
 }
 
-module.exports = function(robot) {
-  robot.hear(/.*/i, function(msg) {
+module.exports = function (robot) {
+  robot.hear(/.*/i, function (msg) {
     const userName = userNameFrom(msg)
     const userPomodoro = currentPomodoro[userName]
-    if (userPomodoro && !msg.message.text.includes("pomo")) {
+    if (userPomodoro && !msg.message.text.includes('pomo')) {
       msg.send(`${userName}さん、ポモドーロの最中は集中してください。`)
     }
   })
 
-  robot.respond(/start pomo ?(\d+)?/i, function(msg) {
+  robot.respond(/start pomo ?(\d+)?/i, function (msg) {
     const userName = userNameFrom(msg)
     if (currentPomodoro[userName]) {
-      msg.send("ポモドーロの途中です。")
+      msg.send('ポモドーロの途中です。')
       return
     }
     const userPomodoro = {}
-    userPomodoro.func = function() {
+    userPomodoro.func = function () {
       msg.send(`${userName}さん、ポモドーロが終わりました。お疲れ様です。`)
       currentPomodoro[userName] = null
     }
@@ -52,10 +52,11 @@ module.exports = function(robot) {
     currentPomodoro[userName] = userPomodoro
     msg.send(`${userName}さんのポモドーロが始まりました。`)
 
-    return userPomodoro.timer = setTimeout(userPomodoro.func, userPomodoro.length * 60 * 1000)
+    userPomodoro.timer = setTimeout(userPomodoro.func, userPomodoro.length * 60 * 1000)
+    return userPomodoro.timer
   })
 
-  robot.respond(/pomo\?/i, function(msg) {
+  robot.respond(/pomo\?/i, function (msg) {
     let minutes
     const userName = userNameFrom(msg)
     const userPomodoro = currentPomodoro[userName]
@@ -69,7 +70,7 @@ module.exports = function(robot) {
     return msg.send(`まだ${minutes}分が残っています。`)
   })
 
-  robot.respond(/stop pomo/i, function(msg) {
+  robot.respond(/stop pomo/i, function (msg) {
     const userName = userNameFrom(msg)
     const userPomodoro = currentPomodoro[userName]
     if (!userPomodoro) {
@@ -78,6 +79,6 @@ module.exports = function(robot) {
     }
     clearTimeout(userPomodoro.timer)
     currentPomodoro[userName] = null
-    return msg.send("ポモドーロが中止されました。")
+    return msg.send('ポモドーロが中止されました。')
   })
 }
