@@ -31,12 +31,12 @@ const parseHtml = (htmlText) => {
     const $el = $(el)
     const companyName = $el.find('a').text()
     const newsText = $el.find('li').map((_i, news) => {
-      const textRemovedCite = $(news).html().replace('<cite>', '*').replace('</cite>', '*')
+      const textRemovedCite = $(news).html().replace('<cite>', ' *').replace('</cite>', '* ')
       const contents = $(news).html(textRemovedCite).text()
 
       return '- ' + contents
     }).get().join('\n')
-    return `${companyName}\n${newsText}`
+    return `> ${companyName}\n${newsText}`
   }).get().join('\n')
 }
 
