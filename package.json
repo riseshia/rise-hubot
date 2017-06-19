@@ -5,6 +5,7 @@
   "author": "Shia",
   "description": "dumb bot",
   "dependencies": {
+    "cheerio": "^1.0.0-rc.1",
     "hubot": "^2.19.0",
     "hubot-diagnostics": "0.0.1",
     "hubot-help": "^0.2.0",
