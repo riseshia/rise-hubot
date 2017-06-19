@@ -9,14 +9,22 @@
 
 const cheerio = require('cheerio')
 
-const targetUrl = 'http://news.erogame-tokuten.com'
 const room = 'general'
+
+const targetUrl = () => {
+  const date = new Date()
+  date.setDate(date.getDate() - 1) // need to get date manipulation support
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  return `http://news.erogame-tokuten.com/history/${year}-${month}-${day}`
+}
 
 const parseHtml = (htmlText) => {
   const $ = cheerio.load(htmlText)
   const nodes = $('.whats_new div:last-child')
   if (nodes.length === 0) {
-    return '新しいニュースがありません。'
+    return '機能は新しいニュースがありませんでした。'
   }
 
   return nodes.map((_i, el) => {
@@ -34,7 +42,8 @@ const parseHtml = (htmlText) => {
 
 module.exports = function (robot) {
   robot.router.get('/news', (_req, res) => {
-    robot.http(targetUrl).get()((err, res, body) => {
+    console.log(targetUrl())
+    robot.http(targetUrl()).get()((err, res, body) => {
       if (err || res.statusCode !== 200) {
         robot.messageRoom(
           room,
