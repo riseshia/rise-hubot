@@ -43,7 +43,8 @@ const parseHtmlToAttachments = (htmlText) => {
     return {
       title: $el.find('a').text(),
       title_link: $el.find('a').attr('href'),
-      text: newsText
+      text: newsText,
+      mrkdwn_in: ['text']
     }
   }).get()
 }
