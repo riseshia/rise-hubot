@@ -29,13 +29,7 @@ const parsePerNews = (_i, news) => {
   return '- ' + contents
 }
 
-const parseHtmlToAttachments = (htmlText) => {
-  const $html = $(htmlText)
-  const nodes = $html.find('.whats_new div:last-child')
-  if (nodes.length === 0) {
-    return '機能は新しいニュースがありませんでした。'
-  }
-
+const parseHtmlToAttachments = (nodes) => {
   return nodes.map((_i, el) => {
     const $el = $(el)
     const newsText = $el.find('li').map(parsePerNews).get().join('\n')
@@ -51,18 +45,25 @@ const parseHtmlToAttachments = (htmlText) => {
 
 module.exports = function (robot) {
   robot.router.get('/news', (_req, res) => {
-    robot.http(targetUrl()).get()((err, res, body) => {
-      if (err || res.statusCode !== 200) {
+    robot.http(targetUrl()).get()((err, rres, body) => {
+      if (err || rres.statusCode !== 200) {
         robot.messageRoom(room, `ニュースの処理中にエラーが発生しました。\n${err}`)
-      } else {
-        const data = {
-          text: '昨日のニュースまとめです。',
-          attachments: parseHtmlToAttachments(body)
-        }
-        robot.messageRoom(room, data)
+        return
       }
-    })
 
+      const $html = $(body)
+      const nodes = $html.find('.whats_new div:last-child')
+      if (nodes.length === 0) {
+        robot.messageRoom(room, '昨日は新しいニュースがありませんでした。')
+        return
+      }
+
+      const data = {
+        text: '昨日のニュースまとめです。',
+        attachments: parseHtmlToAttachments(nodes)
+      }
+      robot.messageRoom(room, data)
+    })
     res.send('OK')
   })
 }
