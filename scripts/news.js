@@ -10,6 +10,14 @@
 const $ = require('cheerio')
 
 const room = 'general'
+const blacklist = (() => {
+  const env = process.env.NEWS_BLACKLIST
+  if (env) {
+    return env.split('|')
+  } else {
+    return []
+  }
+})()
 
 // Return history url 1 day ago
 const targetUrl = () => {
@@ -33,14 +41,18 @@ const parseHtmlToAttachments = (nodes) => {
   return nodes.map((_i, el) => {
     const $el = $(el)
     const newsText = $el.find('li').map(parsePerNews).get().join('\n')
+    const companyName = $el.find('a').text()
+    if (blacklist.indexOf(companyName) !== -1) {
+      return null
+    }
 
     return {
-      title: $el.find('a').text(),
+      title: companyName,
       title_link: $el.find('a').attr('href'),
       text: newsText,
       mrkdwn_in: ['text']
     }
-  }).get()
+  }).get().filter(el => el !== null)
 }
 
 module.exports = function (robot) {
