@@ -28,6 +28,7 @@ const targetUrl = () => {
   const day = date.getDate()
   return `http://news.erogame-tokuten.com/history/${year}-${month}-${day}`
 }
+const hookUrl = process.env.NEWS_PROPERGATION_URL
 
 const parsePerNews = (_i, news) => {
   const $news = $(news)
@@ -75,6 +76,12 @@ module.exports = function (robot) {
         attachments: parseHtmlToAttachments(nodes)
       }
       robot.messageRoom(room, data)
+
+      // Propergation news
+      robot
+        .http(hookUrl)
+        .header('Content-Type', 'application/json')
+        .post(JSON.stringify(data))((_err, _res, _body) => {})
     })
     res.send('OK')
   })
