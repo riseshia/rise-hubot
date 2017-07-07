@@ -19,14 +19,18 @@ const blacklist = (() => {
   }
 })()
 
-// Return history url 1 day ago
-const targetUrl = () => {
+const yesterday = () => {
   const date = new Date()
   date.setDate(date.getDate() - 1) // need to get date manipulation support
   const year = date.getFullYear()
   const month = date.getMonth() + 1
   const day = date.getDate()
-  return `http://news.erogame-tokuten.com/history/${year}-${month}-${day}`
+  return `${year}-${month}-${day}`
+}
+
+// Return history url 1 day ago
+const targetUrl = () => {
+  return `http://news.erogame-tokuten.com/history/${yesterday()}`
 }
 
 const parsePerNews = (_i, news) => {
@@ -71,7 +75,7 @@ module.exports = function (robot) {
       }
 
       const data = {
-        text: '昨日のニュースまとめです。',
+        text: `昨日のニュースまとめです。\n${targetUrl()}`,
         attachments: parseHtmlToAttachments(nodes)
       }
       robot.messageRoom(room, data)
