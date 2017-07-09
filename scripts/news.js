@@ -74,11 +74,13 @@ module.exports = function (robot) {
         return
       }
 
-      const data = {
-        text: `昨日のニュースまとめです。\n${targetUrl()}`,
-        attachments: parseHtmlToAttachments(nodes)
-      }
-      robot.messageRoom(room, data)
+      const attachments = parseHtmlToAttachments(nodes)
+      attachments.unshift({
+        title: yesterday(),
+        title_link: targetUrl()
+      })
+
+      robot.messageRoom(room, { attachments: attachments })
     })
     res.send('OK')
   })
